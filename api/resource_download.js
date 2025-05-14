@@ -1,4 +1,5 @@
 const https = require("https");
+const { https: followHttps } = require("follow-redirects");
 
 module.exports = async (req, res) => {
   const { id } = req.query;
@@ -16,14 +17,24 @@ module.exports = async (req, res) => {
     resp.on("end", () => {
       try {
         const json = JSON.parse(data);
+        if (!json.success || !json.result?.url) {
+          res.status(500).json({ error: "Invalid response structure from CKAN" });
+          return;
+        }
+
         const downloadUrl = json.result.url;
 
-        https.get(downloadUrl, (fileResp) => {
+        followHttps.get(downloadUrl, {
+          headers: {
+            "User-Agent": "Mozilla/5.0"
+          }
+        }, (fileResp) => {
           res.setHeader("Content-Type", fileResp.headers["content-type"] || "application/octet-stream");
           fileResp.pipe(res);
         }).on("error", () => {
           res.status(500).json({ error: "Error downloading file" });
         });
+
       } catch (e) {
         res.status(500).json({ error: "Error processing resource data" });
       }
