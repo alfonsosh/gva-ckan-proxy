@@ -1,0 +1,11 @@
+{
+  "name": "gva-ckan-proxy",
+  "version": "1.0.0",
+  "main": "api/resource_download.js",
+  "scripts": {
+    "start": "node api/resource_download.js"
+  },
+  "dependencies": {
+    "follow-redirects": "^1.15.0"
+  }
+}
